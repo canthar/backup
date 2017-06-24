@@ -1,4 +1,4 @@
-#!/bin/sh -e
+#!/bin/bash -e
 
 # Simple script to create classic ext4 backup on external drive.
 # On external drive (in reality a directory) it creates a bunch of directories with name $(date -Iseconds)
@@ -24,7 +24,7 @@ backup() {
 	LAST_BACKUP="$3"
 	DIRNAME="$(basename "$DIR")"
 	
-	if [ "$LAST_BACKUP" -a -d "$LAST_BACKUP/$DIRNAME" ]
+	if [ "$LAST_BACKUP" ] && [ -d "$LAST_BACKUP/$DIRNAME" ]
 	then
 		rsync -aH --delete --link-dest="$LAST_BACKUP/$DIRNAME" "$DIR/" "$OUTPUT_DIR/$DIRNAME/"
 	else
@@ -66,7 +66,7 @@ fi
 
 while read -r DIR
 do
-	if [ ${DIR:0:1} != / ]
+	if [ "${DIR:0:1}" != / ]
 	then
 		echo 'All paths in /etc/backup.conf must be absolute'
 		exit 1
