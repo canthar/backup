@@ -26,7 +26,7 @@ backup() {
 	
 	if [ "$LAST_BACKUP" ] && [ -d "$LAST_BACKUP/$DIRNAME" ]
 	then
-		rsync -aH --delete --link-dest="$LAST_BACKUP/$DIRNAME" "$DIR/" "$OUTPUT_DIR/$DIRNAME/"
+		rsync -aH --link-dest="$LAST_BACKUP/$DIRNAME" "$DIR/" "$OUTPUT_DIR/$DIRNAME/"
 	else
 		rsync -aH "$DIR/" "$OUTPUT_DIR/$DIRNAME/"
 	fi
