@@ -6,7 +6,7 @@
 # It creates lots of hard links (rsync --link-dest)
 
 usage() {
-	echo 'Usage: backup output_directory'
+	echo 'Usage: backup output_directory dirs...'
 }
 
 find_last_backup() {
@@ -34,22 +34,25 @@ backup() {
 
 create_backup() {
 	BACKUP_DIR="$1"
-	LAST_BACKUP="$2"
+	shift
+	LAST_BACKUP="$1"
+	shift
+	DIRS="$@"
 	DATE="$(date -Iseconds)"
-	NEW_DIR="$1/$DATE"
+	NEW_DIR="$BACKUP_DIR/$DATE"
 	
 	mkdir "$NEW_DIR"
 	
-	while read -r DIR
+	for DIR in $DIRS
 	do
 		backup "$NEW_DIR" "$DIR" "$LAST_BACKUP"
-	done < /etc/backup.conf
+	done
 	
 	rm "$BACKUP_DIR/last_backup" 2> /dev/null || true
 	$(cd "$BACKUP_DIR" && ln -s "$DATE" last_backup)
 }
 
-if [ $# -ne 1 ]
+if [ $# -lt 1 ]
 then
 	echo 'You must provide output_directory'
 	usage
@@ -63,22 +66,19 @@ then
 	usage
 	exit 1
 fi
+shift
 
-while read -r DIR
+DIRS="$@"
+
+for DIR in $DIRS
 do
-	if [ "${DIR:0:1}" != / ]
-	then
-		echo 'All paths in /etc/backup.conf must be absolute'
-		exit 1
-	fi
-	
 	if [ ! -d "$DIR" ]
 	then
-		echo 'All entries in /etc/backup.conf must be existing directories'
+		echo 'All dirs must be existing directories'
 		exit 1
 	fi
-done < /etc/backup.conf
+done
 
 LAST_BACKUP="$(find_last_backup "$BACKUP_DIR")"
 
-create_backup "$BACKUP_DIR" "$LAST_BACKUP"
+create_backup "$BACKUP_DIR" "$LAST_BACKUP" $DIRS
