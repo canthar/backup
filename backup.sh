@@ -37,14 +37,14 @@ create_backup() {
 	shift
 	LAST_BACKUP="$1"
 	shift
-	DIRS="$@"
 	DATE="$(date -Iseconds)"
 	NEW_DIR="$BACKUP_DIR/$DATE"
 	
 	mkdir "$NEW_DIR"
 	
-	for DIR in $DIRS
+	for DIR in "$@"
 	do
+		echo "Backup dir $DIR"
 		backup "$NEW_DIR" "$DIR" "$LAST_BACKUP"
 	done
 	
@@ -68,17 +68,15 @@ then
 fi
 shift
 
-DIRS="$@"
-
-for DIR in $DIRS
+for DIR in "$@"
 do
 	if [ ! -d "$DIR" ]
 	then
-		echo 'All dirs must be existing directories'
+		echo "Directory $DIR does not exit"
 		exit 1
 	fi
 done
 
 LAST_BACKUP="$(find_last_backup "$BACKUP_DIR")"
 
-create_backup "$BACKUP_DIR" "$LAST_BACKUP" $DIRS
+create_backup "$BACKUP_DIR" "$LAST_BACKUP" "$@"
